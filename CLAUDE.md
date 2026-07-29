@@ -135,7 +135,7 @@ reason this project exists is to have done this once before it matters.
 Track progress here as the project develops. Update this section as each
 phase is completed.
 
-- [ ] Express app initialised, /health working
+- [x] Express app initialised, /health working
 - [ ] Prisma schema written, connected to a real hosted Postgres instance
 - [ ] /api/auth/register and /api/auth/login working (tested manually)
 - [ ] requireAuth middleware working
