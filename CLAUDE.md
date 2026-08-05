@@ -136,7 +136,7 @@ Track progress here as the project develops. Update this section as each
 phase is completed.
 
 - [x] Express app initialised, /health working
-- [ ] Prisma schema written, connected to a real hosted Postgres instance
+- [x] Prisma schema written, connected to a real hosted Postgres instance
 - [ ] /api/auth/register and /api/auth/login working (tested manually)
 - [ ] requireAuth middleware working
 - [ ] Bookmark CRUD endpoints working
@@ -149,8 +149,45 @@ phase is completed.
 
 ## Session notes — where we left off
 
-(Nothing yet — starting from scratch. Update this section at the end of
-each session: what got built, what decisions got made and why, what's next.)
+### Session 1 — 2026-08-04
+
+**Built:** Express skeleton with `/health`; Prisma schema (4 models) migrated to
+a hosted Neon Postgres; `db.js` exporting a shared Prisma client; temporary
+`/db-check` route proving Express→Postgres connectivity.
+
+**Decisions:**
+- **ESM (`"type": "module"`)** over CommonJS — one import syntax across server
+  and the future React client.
+- **Neon** over Supabase — Postgres only, no bundled auth/storage to ignore.
+- **Explicit `BookmarkTag` join model** rather than Prisma's implicit m2m, so
+  the table matches the documented data model and is visible in the SQL.
+- **`Int` autoincrement ids** for simplicity; ownership checks in `requireAuth`
+  will cover the enumeration risk that UUIDs would have avoided.
+- Added two indexes beyond the spec: `bookmarks.user_id` and
+  `bookmark_tags.tag_id`. Postgres does *not* auto-index FK columns, and both
+  are on the hot path for `GET /api/bookmarks`.
+- `sslmode=verify-full` in `DATABASE_URL` (was `require`) — keeps certificate
+  verification when the `pg` driver changes its defaults.
+
+**Prisma 7 gotchas (differ from every tutorial):**
+- Client is generated to `server/generated/prisma`, not `node_modules`.
+  Import is `from './generated/prisma/client.ts'` — **not** `@prisma/client`.
+  The `.ts` extension is real; Node 24 strips types at load.
+- `new PrismaClient()` throws without a **driver adapter**. Must pass
+  `new PrismaPg({ connectionString: process.env.DATABASE_URL })`.
+- Connection URL lives in `prisma.config.ts` for the CLI; the app passes it
+  separately at runtime.
+- `prisma migrate dev` does *not* run `prisma generate` — run it yourself.
+- `start` script is `node --env-file=.env index.js`; there is no `dotenv` in
+  the app's runtime path.
+
+**Recurring friction:** wrong working directory (npm/npx act on the current
+folder — `npx` offering to install something already installed means you're in
+the wrong place), and unsaved editor buffers reported as saved. Verify state
+rather than assuming a command applied.
+
+**Next:** `/api/auth/register` — password hashing with bcryptjs, then JWT
+issuing and the httpOnly cookie. Remove `/db-check` once auth routes exist.
 
 ---
 
