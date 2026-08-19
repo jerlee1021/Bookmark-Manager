@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../db.js';
-import { issueAuthCookie, requireAuth } from '../lib/auth.js';
+import { issueAuthCookie, requireAuth, COOKIE_OPTIONS } from '../lib/auth.js';
 
 const router = express.Router();
 
@@ -67,6 +67,11 @@ router.get('/me', requireAuth, async (req, res) => {
     return res.status(401).json({error: 'User not found'});
   }
   res.status(200).json({user});
+});
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('token', COOKIE_OPTIONS);
+  res.status(200).json({message: 'Logout successful'});
 });
 
 export default router;
