@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../db.js';
-import { issueAuthCookie } from '../lib/auth.js';
+import { issueAuthCookie, requireAuth } from '../lib/auth.js';
 
 const router = express.Router();
 
@@ -54,6 +54,19 @@ router.post('/login', async (req, res) => {
   issueAuthCookie(res, user.id);
 
   res.status(200).json({message: 'Login successful', user: {id: user.id, email: user.email}});
+});
+
+router.get('/me', requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({where: {id: req.userId},
+    select: {
+      id: true,
+      email: true,
+    }
+  });
+  if(!user) {
+    return res.status(401).json({error: 'User not found'});
+  }
+  res.status(200).json({user});
 });
 
 export default router;
