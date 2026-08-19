@@ -64,6 +64,7 @@ router.get('/me', requireAuth, async (req, res) => {
     }
   });
   if(!user) {
+    res.clearCookie('token', COOKIE_OPTIONS);
     return res.status(401).json({error: 'User not found'});
   }
   res.status(200).json({user});
