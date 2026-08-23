@@ -9,13 +9,13 @@ export const COOKIE_OPTIONS = {
   maxAge: TOKEN_TTL_MS, // 7 days
 };
 
-//Gatekeep + identify the user
 export const issueAuthCookie = (res, userId) => {
   const token = jwt.sign({userId}, process.env.JWT_SECRET, {expiresIn: '7d'});
   res.cookie('token', token, COOKIE_OPTIONS);
   return token;
 }
 
+//Gatekeep + identify the user
 export const requireAuth = (req, res, next) => {
   const token = req.cookies.token;
   if(!token) {

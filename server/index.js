@@ -1,5 +1,4 @@
 import express from 'express';
-import prisma from './db.js';
 import authRoutes from './routes/auth.js';
 import bookmarkRoutes from './routes/bookmark.js';
 import cookieParser from 'cookie-parser';
